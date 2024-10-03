@@ -46,6 +46,7 @@ func makeshortHandle(rw http.ResponseWriter, r *http.Request) {
 	var url Url
 	err := json.NewDecoder(r.Body).Decode(&url)
 	if err != nil {
+		rw.WriteHeader(http.StatusBadRequest)
 		rw.Write([]byte(err.Error()))
 		return
 	}
