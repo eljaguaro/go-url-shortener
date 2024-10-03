@@ -43,7 +43,7 @@ func geturlHandle(rw http.ResponseWriter, r *http.Request) {
 }
 
 type URL struct {
-	Url string `json:"url"`
+	URL string `json:"url"`
 }
 
 func makeshortHandle(rw http.ResponseWriter, r *http.Request) {
@@ -59,7 +59,7 @@ func makeshortHandle(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 	rw.WriteHeader(http.StatusCreated)
-	rw.Write([]byte(makeshortFunc(url.Url)))
+	rw.Write([]byte(makeshortFunc(url.URL)))
 }
 
 // curl -X POST 'http://localhost:8080/' -H "text/plain" -d '{"URL": "abc"}'
