@@ -38,12 +38,12 @@ func geturlHandle(rw http.ResponseWriter, r *http.Request) {
 	io.WriteString(rw, long)
 }
 
-type Url struct {
+type URL struct {
 	Url string `json:"url"`
 }
 
 func makeshortHandle(rw http.ResponseWriter, r *http.Request) {
-	var url Url
+	var url URL
 	err := json.NewDecoder(r.Body).Decode(&url)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
