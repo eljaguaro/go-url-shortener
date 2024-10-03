@@ -31,7 +31,7 @@ func testRequest(t *testing.T, ts *resty.Client, method string,
 }
 
 func TestMakeshort(t *testing.T) {
-	ts := resty.New().SetBaseURL("http://localhost:8080")
+	ts := resty.New().SetHostURL("http://localhost:8080")
 	type etal struct {
 		method string
 		url    string
