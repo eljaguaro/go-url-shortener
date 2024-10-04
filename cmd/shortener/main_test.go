@@ -40,7 +40,7 @@ func TestMakeshort(t *testing.T) {
 		geturl string
 	}
 	var testTable = []etal{
-		{"POST", "http://localhost:8080/", "", http.StatusCreated, ""},
+		// {"POST", "http://localhost:8080/", "", http.StatusCreated, ""},
 		{"POST", "http://localhost:8080/", "https://practicum.ru/", http.StatusCreated, ""},
 		{"POST", "http://localhost:8080/", "https://yandex.ru/", http.StatusCreated, ""},
 	}

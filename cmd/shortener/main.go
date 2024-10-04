@@ -38,7 +38,7 @@ func geturlHandle(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 	rw.WriteHeader(http.StatusTemporaryRedirect)
-	io.WriteString(rw, long)
+	rw.Write([]byte(long))
 }
 
 type URL struct {
