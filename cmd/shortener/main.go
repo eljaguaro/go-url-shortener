@@ -38,6 +38,7 @@ func geturlHandle(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 	rw.WriteHeader(http.StatusTemporaryRedirect)
+	rw.Header().Set("Location", long)
 	rw.Write([]byte(long))
 }
 
@@ -46,10 +47,10 @@ type URL struct {
 }
 
 func makeshortHandle(rw http.ResponseWriter, r *http.Request) {
-	if r.Host != "localhost:8080" {
-		rw.WriteHeader(http.StatusBadRequest)
-		return
-	}
+	// if r.Host != "localhost:8080" {
+	// 	rw.WriteHeader(http.StatusBadRequest)
+	// 	return
+	// }
 	var url URL
 	b, err := io.ReadAll(r.Body)
 	url.URL = string(b)
