@@ -31,7 +31,7 @@ func testRequest(t *testing.T, ts *resty.Client, method string,
 }
 
 func TestMakeshort(t *testing.T) {
-	ts := resty.New().SetHostURL("http://localhost:8080")
+	ts := resty.New().SetBaseURL("http://localhost:8080")
 	type etal struct {
 		method string
 		url    string
@@ -40,8 +40,9 @@ func TestMakeshort(t *testing.T) {
 		geturl string
 	}
 	var testTable = []etal{
-		{"POST", "http://localhost:8080/", `{"url": "https://practicum.ru/"}`, http.StatusCreated, ""},
-		{"POST", "http://localhost:8080/", `{"url": "https://yandex.ru/"}`, http.StatusCreated, ""},
+		{"POST", "http://localhost:8080/", "", http.StatusCreated, ""},
+		{"POST", "http://localhost:8080/", "https://practicum.ru/", http.StatusCreated, ""},
+		{"POST", "http://localhost:8080/", "https://yandex.ru/", http.StatusCreated, ""},
 	}
 	var shorts []string
 	for _, v := range testTable {
@@ -91,6 +92,10 @@ func TestMakeshort(t *testing.T) {
 // }
 
 // func geturlHandle(rw http.ResponseWriter, r *http.Request) {
+// 	if r.Host != "localhost:8080" {
+// 		rw.WriteHeader(http.StatusBadRequest)
+// 		return
+// 	}
 // 	long := geturlFunc(chi.URLParam(r, "id"))
 // 	if long == "The short url not found" {
 // 		rw.WriteHeader(http.StatusNotFound)
@@ -100,19 +105,24 @@ func TestMakeshort(t *testing.T) {
 // 	io.WriteString(rw, long)
 // }
 
-// type Url struct {
-// 	Url string `json:"url"`
+// type URL struct {
+// 	URL string `json:"url"`
 // }
 
 // func makeshortHandle(rw http.ResponseWriter, r *http.Request) {
-// 	var url Url
+// 	if r.Host != "localhost:8080" {
+// 		rw.WriteHeader(http.StatusBadRequest)
+// 		return
+// 	}
+// 	var url URL
 // 	err := json.NewDecoder(r.Body).Decode(&url)
 // 	if err != nil {
+// 		rw.WriteHeader(http.StatusBadRequest)
 // 		rw.Write([]byte(err.Error()))
 // 		return
 // 	}
 // 	rw.WriteHeader(http.StatusCreated)
-// 	rw.Write([]byte(makeshortFunc(url.Url)))
+// 	rw.Write([]byte(makeshortFunc(url.URL)))
 // }
 
 // // curl -X POST 'http://localhost:8080/' -H "text/plain" -d '{"URL": "abc"}'

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"io"
 	"log"
 	"net/http"
@@ -43,7 +42,7 @@ func geturlHandle(rw http.ResponseWriter, r *http.Request) {
 }
 
 type URL struct {
-	URL string `json:"url"`
+	URL string
 }
 
 func makeshortHandle(rw http.ResponseWriter, r *http.Request) {
@@ -52,7 +51,8 @@ func makeshortHandle(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var url URL
-	err := json.NewDecoder(r.Body).Decode(&url)
+	b, err := io.ReadAll(r.Body)
+	url.URL = string(b)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		rw.Write([]byte(err.Error()))
