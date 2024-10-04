@@ -28,10 +28,10 @@ func geturlFunc(url string) string {
 }
 
 func geturlHandle(rw http.ResponseWriter, r *http.Request) {
-	if r.Host != "localhost:8080" {
-		rw.WriteHeader(http.StatusBadRequest)
-		return
-	}
+	// if r.Host != "localhost:8080" {
+	// 	rw.WriteHeader(http.StatusBadRequest)
+	// 	return
+	// }
 	long := geturlFunc(chi.URLParam(r, "id"))
 	if long == "The short url not found" {
 		rw.WriteHeader(http.StatusNotFound)
