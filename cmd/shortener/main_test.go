@@ -31,7 +31,8 @@ func testRequest(t *testing.T, ts *resty.Client, method string,
 }
 
 func TestMakeshort(t *testing.T) {
-	ts := resty.New().SetBaseURL("http://localhost:8080")
+	ts := resty.New()
+
 	type etal struct {
 		method string
 		url    string
@@ -41,8 +42,8 @@ func TestMakeshort(t *testing.T) {
 	}
 	var testTable = []etal{
 		// {"POST", "http://localhost:8080/", "", http.StatusCreated, ""},
-		{"POST", "http://localhost:8080/", "https://practicum.ru/", http.StatusCreated, ""},
-		{"POST", "http://localhost:8080/", "https://yandex.ru/", http.StatusCreated, ""},
+		{"POST", "http://localhost:8080/", "http://practicum.ru/", http.StatusCreated, ""},
+		{"POST", "http://localhost:8080/", "http://yandex.ru/", http.StatusCreated, ""},
 	}
 	var shorts []string
 	for _, v := range testTable {
@@ -51,8 +52,8 @@ func TestMakeshort(t *testing.T) {
 		shorts = append(shorts, string(resp.Body()))
 	}
 
-	testTable = append(testTable, etal{"GET", "http://localhost:8080/" + shorts[0], "", http.StatusTemporaryRedirect, "https://practicum.ru/"})
-	testTable = append(testTable, etal{"GET", "http://localhost:8080/" + shorts[1], "", http.StatusTemporaryRedirect, "https://yandex.ru/"})
+	testTable = append(testTable, etal{"GET", "http://localhost:8080/" + shorts[0], "", http.StatusTemporaryRedirect, "http://practicum.ru/"})
+	testTable = append(testTable, etal{"GET", "http://localhost:8080/" + shorts[1], "", http.StatusTemporaryRedirect, "http://yandex.ru/"})
 	testTable = append(testTable, etal{"GET", "http://localhost:8080/" + "A" + shorts[1], "", http.StatusNotFound, ""})
 	for _, v := range testTable[2:] {
 		resp := testRequest(t, ts, v.method, v.url, v.body)

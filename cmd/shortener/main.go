@@ -37,9 +37,8 @@ func geturlHandle(rw http.ResponseWriter, r *http.Request) {
 		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
-	rw.WriteHeader(http.StatusTemporaryRedirect)
-	rw.Header().Set("Location", long)
-	rw.Write([]byte(long))
+	http.Redirect(rw, r, long, http.StatusTemporaryRedirect)
+	// rw.Write([]byte(long))
 }
 
 type URL struct {
