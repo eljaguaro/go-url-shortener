@@ -24,7 +24,7 @@ func geturlFunc(url string) string {
 	if !ok {
 		return "The short url not found"
 	}
-	return long
+	return "http://localhost:8080/" + long
 }
 
 func geturlHandle(rw http.ResponseWriter, r *http.Request) {
