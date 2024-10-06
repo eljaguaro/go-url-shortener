@@ -31,6 +31,7 @@ func testRequest(t *testing.T, ts *resty.Client, method string,
 }
 
 func TestMakeshort(t *testing.T) {
+	go main()
 	ts := resty.New()
 	type etal struct {
 		method string
@@ -40,8 +41,8 @@ func TestMakeshort(t *testing.T) {
 		geturl string
 	}
 	var testTable = []etal{
-		{"POST", "http://localhost:8080/", `{"url": "https://practicum.ru/"}`, http.StatusCreated, ""},
-		{"POST", "http://localhost:8080/", `{"url": "https://yandex.ru/"}`, http.StatusCreated, ""},
+		{"POST", "http://localhost:8080/", "https://practicum.ru/", http.StatusCreated, ""},
+		{"POST", "http://localhost:8080/", "https://yandex.ru/", http.StatusCreated, ""},
 	}
 	var shorts []string
 	for _, v := range testTable {
