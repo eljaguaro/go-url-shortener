@@ -67,10 +67,10 @@ func makeshortHandle(rw http.ResponseWriter, r *http.Request) {
 	rw.Write([]byte("http://localhost:8080/" + makeshortFunc(url.URL)))
 }
 
-func rhandle(rw http.ResponseWriter, r *http.Request) {
-	http.Redirect(rw, r, "http://ya.ru/", http.StatusTemporaryRedirect)
+// func rhandle(rw http.ResponseWriter, r *http.Request) {
+// 	http.Redirect(rw, r, "http://ya.ru/", http.StatusTemporaryRedirect)
 
-}
+// }
 
 // curl -X POST 'http://localhost:8080/' -H "text/plain" -d '{"URL": "abc"}'
 
@@ -79,7 +79,7 @@ func main() {
 	r := chi.NewRouter()
 	r.Post("/", makeshortHandle)
 	r.Get("/{id}", geturlHandle)
-	r.Get("/fw", rhandle)
+	// r.Get("/fw", rhandle)
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
