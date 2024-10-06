@@ -41,8 +41,8 @@ func TestMakeshort(t *testing.T) {
 		geturl string
 	}
 	var testTable = []etal{
-		{"POST", "http://localhost:8080/", "https://practicum.ru/", http.StatusCreated, ""},
-		{"POST", "http://localhost:8080/", "https://yandex.ru/", http.StatusCreated, ""},
+		{"POST", "http://localhost:8080/", "http://practicum.ru/", http.StatusCreated, ""},
+		{"POST", "http://localhost:8080/", "http://yandex.ru/", http.StatusCreated, ""},
 	}
 	var shorts []string
 	for _, v := range testTable {
@@ -51,9 +51,9 @@ func TestMakeshort(t *testing.T) {
 		shorts = append(shorts, string(resp.Body()))
 	}
 
-	testTable = append(testTable, etal{"GET", shorts[0], "", http.StatusTemporaryRedirect, "https://practicum.ru/"})
-	testTable = append(testTable, etal{"GET", shorts[1], "", http.StatusTemporaryRedirect, "https://yandex.ru/"})
-	testTable = append(testTable, etal{"GET", "A" + shorts[1], "", http.StatusNotFound, ""})
+	testTable = append(testTable, etal{"GET", shorts[0], "", http.StatusTemporaryRedirect, "http://practicum.ru/"})
+	testTable = append(testTable, etal{"GET", shorts[1], "", http.StatusTemporaryRedirect, "http://yandex.ru/"})
+	testTable = append(testTable, etal{"GET", shorts[1] + "efw", "", http.StatusNotFound, ""})
 	for _, v := range testTable[2:] {
 		resp := testRequest(t, ts, v.method, v.url, v.body)
 		assert.Equal(t, v.status, resp.StatusCode())

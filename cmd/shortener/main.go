@@ -77,8 +77,6 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
-// k0CA1T3m
-
 // package main
 
 // import (
