@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"io"
 	"log"
 	"net/http"
@@ -28,42 +29,34 @@ func geturlFunc(url string) string {
 }
 
 func geturlHandle(rw http.ResponseWriter, r *http.Request) {
-	// if r.Host != "localhost:8080" {
-	// 	rw.WriteHeader(http.StatusBadRequest)
-	// 	return
-	// }
 	long := geturlFunc(chi.URLParam(r, "id"))
 	if long == "The short url not found" {
 		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
-	// rw.WriteHeader(http.StatusTemporaryRedirect)
-	// rw.Header().Set("Location", long)
 	http.Redirect(rw, r, long, http.StatusTemporaryRedirect)
-	// http.Redirect(rw, r, long, http.StatusTemporaryRedirect)
-	// rw.Write([]byte(long))
+	// rw.WriteHeader(http.StatusTemporaryRedirect)
+	io.WriteString(rw, long)
 }
 
 type URL struct {
-	URL string
+	URL string `json:"url"`
 }
 
 func makeshortHandle(rw http.ResponseWriter, r *http.Request) {
-	// if r.Host != "localhost:8080" {
-	// 	rw.WriteHeader(http.StatusBadRequest)
-	// 	return
-	// }
+	if r.Host != "localhost:8080" {
+		rw.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	var url URL
-	b, err := io.ReadAll(r.Body)
-	url.URL = string(b)
+	err := json.NewDecoder(r.Body).Decode(&url)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		rw.Write([]byte(err.Error()))
 		return
 	}
-	// http.RedirectHandler()
+
 	rw.WriteHeader(http.StatusCreated)
-	rw.Header().Set("Content-Type", "text/plain")
 	rw.Write([]byte("http://localhost:8080/" + makeshortFunc(url.URL)))
 }
 
