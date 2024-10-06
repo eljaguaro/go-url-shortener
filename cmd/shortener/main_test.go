@@ -61,7 +61,19 @@ func TestMakeshort(t *testing.T) {
 		fmt.Println(testTable)
 		resp := testRequest(t, ts, v.method, v.url, v.body)
 		assert.Equal(t, v.status, resp.StatusCode())
+		// assert.Equal(t, v.status, resp.StatusCode())
+		// loc, err := resp.RawResponse.StatusCode()
+		// assert.Equal(t, err, nil)
+		// assert.Equal(t, v.geturl, loc)
 	}
+	// resp, err := ts.R().
+	//
+	//	SetHeader("Content-Type", "text/plain; charset=UTF-8").
+	//	SetBody("").
+	//	Get("http://localhost:8080/fw")
+	//
+	// require.NoError(t, err)
+	// fmt.Println(resp)
 }
 
 // package main
