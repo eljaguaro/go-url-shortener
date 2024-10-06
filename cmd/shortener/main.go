@@ -39,7 +39,7 @@ func geturlHandle(rw http.ResponseWriter, r *http.Request) {
 	}
 	// rw.WriteHeader(http.StatusTemporaryRedirect)
 	// rw.Header().Set("Location", long)
-	http.Redirect(rw, r, "http://localhost:8080/"+long, http.StatusTemporaryRedirect)
+	http.Redirect(rw, r, long, http.StatusTemporaryRedirect)
 	// http.Redirect(rw, r, long, http.StatusTemporaryRedirect)
 	// rw.Write([]byte(long))
 }
@@ -64,7 +64,7 @@ func makeshortHandle(rw http.ResponseWriter, r *http.Request) {
 	// http.RedirectHandler()
 	rw.WriteHeader(http.StatusCreated)
 	rw.Header().Set("Content-Type", "text/plain")
-	rw.Write([]byte(makeshortFunc(url.URL)))
+	rw.Write([]byte("http://localhost:8080/" + makeshortFunc(url.URL)))
 }
 
 // curl -X POST 'http://localhost:8080/' -H "text/plain" -d '{"URL": "abc"}'
