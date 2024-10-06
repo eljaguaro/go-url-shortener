@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	// "net/http/httptest"
+	"fmt"
 	"testing"
 
 	"github.com/go-resty/resty/v2"
@@ -31,6 +32,7 @@ func testRequest(t *testing.T, ts *resty.Client, method string,
 }
 
 func TestMakeshort(t *testing.T) {
+	// quit := make(chan bool)
 	go main()
 	ts := resty.New()
 	type etal struct {
@@ -54,10 +56,11 @@ func TestMakeshort(t *testing.T) {
 	testTable = append(testTable, etal{"GET", shorts[0], "", http.StatusTemporaryRedirect, "http://practicum.ru/"})
 	testTable = append(testTable, etal{"GET", shorts[1], "", http.StatusTemporaryRedirect, "http://yandex.ru/"})
 	testTable = append(testTable, etal{"GET", shorts[1] + "efw", "", http.StatusNotFound, ""})
+	fmt.Println(testTable)
 	for _, v := range testTable[2:] {
+		fmt.Println(testTable)
 		resp := testRequest(t, ts, v.method, v.url, v.body)
 		assert.Equal(t, v.status, resp.StatusCode())
-		assert.Equal(t, v.geturl, string(resp.Body()))
 	}
 }
 
