@@ -39,9 +39,9 @@ func geturlHandle(rw http.ResponseWriter, r *http.Request) {
 	}
 	// rw.WriteHeader(http.StatusTemporaryRedirect)
 	// rw.Header().Set("Location", long)
-	http.Redirect(rw, r, long, http.StatusTemporaryRedirect)
-	// http.Redirect(rw, r, long, http.StatusTemporaryRedirect)
-	rw.Write([]byte("few"))
+	// http.Redirect(rw, r, long, http.StatusPermanentRedirect)
+	http.Redirect(rw, r, long, 200)
+	// rw.Write([]byte("few"))
 }
 
 type URL struct {
@@ -68,7 +68,7 @@ func makeshortHandle(rw http.ResponseWriter, r *http.Request) {
 }
 
 // func rhandle(rw http.ResponseWriter, r *http.Request) {
-// 	http.Redirect(rw, r, "http://ya.ru/", http.StatusTemporaryRedirect)
+// 	http.Redirect(rw, r, "http://abc.ru/", 309)
 
 // }
 

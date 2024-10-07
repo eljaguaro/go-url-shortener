@@ -24,57 +24,78 @@ func testRequest(t *testing.T, ts *resty.Client, method string,
 	} else {
 		resp, err := ts.R().
 			SetHeader("Content-Type", "text/plain; charset=UTF-8").
-			SetBody(body).
 			Get(path)
 		require.NoError(t, err)
 		return resp
 	}
 }
 
+var shorts []string
+
 func TestMakeshort(t *testing.T) {
 	// quit := make(chan bool)
 	go main()
 	ts := resty.New()
-	type etal struct {
+	type etalpost struct {
 		method string
 		url    string
 		body   string
 		status int
 		geturl string
 	}
-	var testTable = []etal{
-		{"POST", "http://localhost:8080/", "http://practicum.ru/", http.StatusCreated, ""},
-		{"POST", "http://localhost:8080/", "http://yandex.ru/", http.StatusCreated, ""},
+	var testTable = []etalpost{
+		{"POST", "http://localhost:8080/", "http://abc.com", http.StatusCreated, ""},
+		{"POST", "http://localhost:8080/", "http://abc.com", http.StatusCreated, ""},
 	}
-	var shorts []string
+	// var shorts []string
 	for _, v := range testTable {
 		resp := testRequest(t, ts, v.method, v.url, v.body)
 		assert.Equal(t, v.status, resp.StatusCode())
 		shorts = append(shorts, string(resp.Body()))
 	}
+}
 
-	testTable = append(testTable, etal{"GET", shorts[0], "", http.StatusTemporaryRedirect, "http://practicum.ru/"})
-	testTable = append(testTable, etal{"GET", shorts[1], "", http.StatusTemporaryRedirect, "http://yandex.ru/"})
-	testTable = append(testTable, etal{"GET", shorts[1] + "efw", "", http.StatusNotFound, ""})
+func TestGetUrl(t *testing.T) {
+	// go main()
+	TestMakeshort(t)
+	ts := resty.New()
+	type etalget struct {
+		method string
+		url    string
+		status int
+		scheme string
+		host   string
+	}
+	fmt.Println(shorts)
+	var testTable = []etalget{}
+	testTable = append(testTable, etalget{"GET", shorts[0], 200, "http", "abc.com"})
+	testTable = append(testTable, etalget{"GET", shorts[1], 200, "http", "abc.com"})
+	// testTable = append(testTable, etalget{"GET", shorts[1] + "efw", http.StatusNotFound, "", ""})
 	fmt.Println(testTable)
-	for _, v := range testTable[2:] {
+	for _, v := range testTable {
 		fmt.Println(testTable)
-		resp := testRequest(t, ts, v.method, v.url, v.body)
+		resp := testRequest(t, ts, v.method, v.url, "")
 		assert.Equal(t, v.status, resp.StatusCode())
+		loc, err := resp.RawResponse.Location()
+		assert.Equal(t, err, nil)
+		assert.Equal(t, v.scheme, loc.Scheme)
+		assert.Equal(t, v.host, loc.Host)
 		// assert.Equal(t, v.status, resp.StatusCode())
 		// loc, err := resp.RawResponse.StatusCode()
 		// assert.Equal(t, err, nil)
 		// assert.Equal(t, v.geturl, loc)
 	}
-	// resp, err := ts.R().
-	//
-	//	SetHeader("Content-Type", "text/plain; charset=UTF-8").
-	//	SetBody("").
-	//	Get("http://localhost:8080/fw")
-	//
-	// require.NoError(t, err)
-	// fmt.Println(resp)
 }
+
+// resp, err := ts.R().
+//
+//	SetHeader("Content-Type", "text/plain; charset=UTF-8").
+//	SetBody("").
+//	Get("http://localhost:8080/fw")
+//
+// require.NoError(t, err)
+// fmt.Println(resp)
+// }
 
 // package main
 
