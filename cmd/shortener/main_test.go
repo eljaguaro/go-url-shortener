@@ -34,7 +34,7 @@ var shorts []string
 
 func TestMakeshort(t *testing.T) {
 	// quit := make(chan bool)
-	go main()
+	// go main()
 	ts := resty.New()
 	type etalpost struct {
 		method string
