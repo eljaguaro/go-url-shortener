@@ -32,9 +32,9 @@ func testRequest(t *testing.T, ts *resty.Client, method string,
 
 var shorts []string
 
-func TestMakeshort(t *testing.T) {
+func TestShortener(t *testing.T) {
 	// quit := make(chan bool)
-	// go main()
+	go main()
 	ts := resty.New()
 	type etalpost struct {
 		method string
@@ -53,12 +53,6 @@ func TestMakeshort(t *testing.T) {
 		assert.Equal(t, v.status, resp.StatusCode())
 		shorts = append(shorts, string(resp.Body()))
 	}
-}
-
-func TestGetUrl(t *testing.T) {
-	// go main()
-	TestMakeshort(t)
-	ts := resty.New()
 	type etalget struct {
 		method string
 		url    string
@@ -67,9 +61,9 @@ func TestGetUrl(t *testing.T) {
 		host   string
 	}
 	fmt.Println(shorts)
-	var testTable = []etalget{}
-	testTable = append(testTable, etalget{"GET", shorts[0], 200, "http", "abc.com"})
-	testTable = append(testTable, etalget{"GET", shorts[1], 200, "http", "abc.com"})
+	var testTable2 = []etalget{}
+	testTable2 = append(testTable2, etalget{"GET", shorts[0], 200, "http", "abc.com"})
+	testTable2 = append(testTable2, etalget{"GET", shorts[1], 200, "http", "abc.com"})
 	// testTable = append(testTable, etalget{"GET", shorts[1] + "efw", http.StatusNotFound, "", ""})
 	fmt.Println(testTable)
 	for _, v := range testTable {
