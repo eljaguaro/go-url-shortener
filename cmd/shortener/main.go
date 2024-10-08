@@ -44,7 +44,7 @@ func geturlHandle(rw http.ResponseWriter, r *http.Request) {
 	// rw.WriteHeader(http.StatusTemporaryRedirect)
 	// rw.Header().Set("Location", long)
 	// http.Redirect(rw, r, long, http.StatusPermanentRedirect)
-	http.Redirect(rw, r, long, 307)
+	http.Redirect(rw, r, long, http.StatusTemporaryRedirect)
 	// rw.Write([]byte("few"))
 }
 
@@ -80,8 +80,8 @@ func makeshortHandle(rw http.ResponseWriter, r *http.Request, surladdr string) {
 // var emptystr = ""
 
 type Config struct {
-	SERVER_ADDRESS *string `env:"SERVER_ADDRESS"`
-	BASE_URL       *string `env:"BASE_URL"`
+	serverAddress *string `env:"SERVER_ADDRESS"`
+	baseUrl       *string `env:"BASE_URL"`
 }
 
 func main() {
@@ -97,11 +97,11 @@ func main() {
 	flag.Parse()
 	fmt.Println("address to run the server:", run)
 	fmt.Println("server address and shorturl", surladdr)
-	if cfg.SERVER_ADDRESS != nil {
-		run = cfg.SERVER_ADDRESS
+	if cfg.serverAddress != nil {
+		run = cfg.serverAddress
 	}
-	if cfg.BASE_URL != nil {
-		surladdr = cfg.BASE_URL
+	if cfg.baseUrl != nil {
+		surladdr = cfg.baseUrl
 	}
 	port := strings.Split(*run, ":")[1]
 	r := chi.NewRouter()

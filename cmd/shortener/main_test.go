@@ -23,9 +23,11 @@ func testRequest(t *testing.T, ts *http.Client, method string,
 		require.NoError(t, err)
 		req.Header.Add("Content-type", `"text/plain"`)
 		resp, err := ts.Do(req)
+		require.NoError(t, err)
 		return resp
 	} else {
 		req, err := http.NewRequest(method, path, nil)
+		require.NoError(t, err)
 		req.Header.Add("Content-type", `"text/plain"`)
 		resp, err := ts.Do(req)
 		require.NoError(t, err)
@@ -58,10 +60,12 @@ func TestShortener(t *testing.T) {
 	// var shorts []string
 	for _, v := range testTable {
 		resp := testRequest(t, ts, v.method, v.url, v.body)
+
 		assert.Equal(t, v.status, resp.StatusCode)
 		b, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 		shorts = append(shorts, string(b))
+		resp.Body.Close()
 	}
 	type etalget struct {
 		method string
@@ -80,6 +84,7 @@ func TestShortener(t *testing.T) {
 		fmt.Println(testTable)
 		resp := testRequest(t, ts, v.method, v.url, "")
 		assert.Equal(t, v.status, resp.StatusCode)
+		resp.Body.Close()
 		// loc := resp.
 		// assert.Equal(t, 1, loc)
 		// assert.Equal(t, err, nil)
