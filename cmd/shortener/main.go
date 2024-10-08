@@ -67,7 +67,7 @@ func makeshortHandle(rw http.ResponseWriter, r *http.Request, surladdr string) {
 	// http.RedirectHandler()
 	rw.WriteHeader(http.StatusCreated)
 	rw.Header().Set("Content-Type", "text/plain")
-	rw.Write([]byte(surladdr + makeshortFunc(url.URL)))
+	rw.Write([]byte(surladdr + "/" + makeshortFunc(url.URL)))
 }
 
 // func rhandle(rw http.ResponseWriter, r *http.Request) {
