@@ -81,7 +81,7 @@ func main() {
 	// urlmap := make(map[string]string)
 	// r.Get("/fw", rhandle)
 	run := flag.String("a", "localhost:8080", "адрес запуска http-сервера")
-	surladdr := flag.String("b", "http://localhost:8080/", "базовый адрес результирующего URL")
+	surladdr := flag.String("b", "http://localhost:8080", "базовый адрес результирующего URL")
 	flag.Parse()
 	fmt.Println("address to run the server:", *run)
 	fmt.Println("server address and shorturl", *surladdr)
