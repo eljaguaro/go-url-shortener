@@ -74,6 +74,7 @@ func TestShortener(t *testing.T) {
 		scheme string
 		host   string
 	}
+
 	fmt.Println(shorts)
 	var testTable2 = []etalget{}
 	testTable2 = append(testTable2, etalget{"GET", shorts[0], 307, "http", "abc.com"})
