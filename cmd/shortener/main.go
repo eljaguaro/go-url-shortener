@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/thanhpk/randstr"
@@ -50,7 +51,7 @@ type URL struct {
 	URL string
 }
 
-func makeshortHandle(rw http.ResponseWriter, r *http.Request) {
+func makeshortHandle(rw http.ResponseWriter, r *http.Request, surladdr string) {
 	// if r.Host != "localhost:8080" {
 	// 	rw.WriteHeader(http.StatusBadRequest)
 	// 	return
@@ -66,7 +67,7 @@ func makeshortHandle(rw http.ResponseWriter, r *http.Request) {
 	// http.RedirectHandler()
 	rw.WriteHeader(http.StatusCreated)
 	rw.Header().Set("Content-Type", "text/plain")
-	rw.Write([]byte("http://localhost:8080/" + makeshortFunc(url.URL)))
+	rw.Write([]byte(surladdr + makeshortFunc(url.URL)))
 }
 
 // func rhandle(rw http.ResponseWriter, r *http.Request) {
@@ -78,16 +79,17 @@ func makeshortHandle(rw http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// urlmap := make(map[string]string)
-	r := chi.NewRouter()
-	r.Post("/", makeshortHandle)
-	r.Get("/{id}", geturlHandle)
 	// r.Get("/fw", rhandle)
 	run := flag.String("a", "localhost:8080", "адрес запуска http-сервера")
-	surl := flag.String("b", "http://localhost:8000/qsd54gFg", "безовый адрес результирующего URL")
+	surladdr := flag.String("b", "http://localhost:8080/", "базовый адрес результирующего URL")
 	flag.Parse()
 	fmt.Println("address to run the server:", *run)
-	fmt.Println("server address and shorturl", *surl)
-	log.Fatal(http.ListenAndServe(":8080", r))
+	fmt.Println("server address and shorturl", *surladdr)
+	port := strings.Split(*run, ":")[1]
+	r := chi.NewRouter()
+	r.Post("/", func(rw http.ResponseWriter, r *http.Request) { makeshortHandle(rw, r, *surladdr) })
+	r.Get("/{id}", geturlHandle)
+	log.Fatal(http.ListenAndServe(":"+port, r))
 }
 
 // package main
