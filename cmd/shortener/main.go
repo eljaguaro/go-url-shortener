@@ -81,7 +81,7 @@ func makeshortHandle(rw http.ResponseWriter, r *http.Request, surladdr string) {
 
 type Config struct {
 	serverAddress *string `env:"SERVER_ADDRESS"`
-	baseUrl       *string `env:"BASE_URL"`
+	baseURL       *string `env:"BASE_URL"`
 }
 
 func main() {
@@ -100,8 +100,8 @@ func main() {
 	if cfg.serverAddress != nil {
 		run = cfg.serverAddress
 	}
-	if cfg.baseUrl != nil {
-		surladdr = cfg.baseUrl
+	if cfg.baseURL != nil {
+		surladdr = cfg.baseURL
 	}
 	port := strings.Split(*run, ":")[1]
 	r := chi.NewRouter()
