@@ -77,6 +77,8 @@ func makeshortHandle(rw http.ResponseWriter, r *http.Request, surladdr string) {
 // }
 
 // curl -X POST 'http://localhost:8080/' -H "text/plain" -d '{"URL": "abc"}'
+// var emptystr = ""
+
 type Config struct {
 	SERVER_ADDRESS *string `env:"SERVER_ADDRESS"`
 	BASE_URL       *string `env:"BASE_URL"`
@@ -93,12 +95,12 @@ func main() {
 	run := flag.String("a", "localhost:8080", "адрес запуска http-сервера")
 	surladdr := flag.String("b", "http://localhost:8080", "базовый адрес результирующего URL")
 	flag.Parse()
-	fmt.Println("address to run the server:", *run)
-	fmt.Println("server address and shorturl", *surladdr)
-	if *cfg.SERVER_ADDRESS != "" {
+	fmt.Println("address to run the server:", run)
+	fmt.Println("server address and shorturl", surladdr)
+	if cfg.SERVER_ADDRESS != nil {
 		run = cfg.SERVER_ADDRESS
 	}
-	if *cfg.BASE_URL != "" {
+	if cfg.BASE_URL != nil {
 		surladdr = cfg.BASE_URL
 	}
 	port := strings.Split(*run, ":")[1]
