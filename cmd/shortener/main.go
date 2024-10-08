@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/caarlos0/env/v6"
 	"github.com/go-chi/chi/v5"
 	"github.com/thanhpk/randstr"
 )
@@ -76,15 +77,30 @@ func makeshortHandle(rw http.ResponseWriter, r *http.Request, surladdr string) {
 // }
 
 // curl -X POST 'http://localhost:8080/' -H "text/plain" -d '{"URL": "abc"}'
+type Config struct {
+	SERVER_ADDRESS *string `env:"SERVER_ADDRESS"`
+	BASE_URL       *string `env:"BASE_URL"`
+}
 
 func main() {
 	// urlmap := make(map[string]string)
 	// r.Get("/fw", rhandle)
+	var cfg Config
+	err := env.Parse(&cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
 	run := flag.String("a", "localhost:8080", "адрес запуска http-сервера")
 	surladdr := flag.String("b", "http://localhost:8080", "базовый адрес результирующего URL")
 	flag.Parse()
 	fmt.Println("address to run the server:", *run)
 	fmt.Println("server address and shorturl", *surladdr)
+	if *cfg.SERVER_ADDRESS != "" {
+		run = cfg.SERVER_ADDRESS
+	}
+	if *cfg.BASE_URL != "" {
+		surladdr = cfg.BASE_URL
+	}
 	port := strings.Split(*run, ":")[1]
 	r := chi.NewRouter()
 	r.Post("/", func(rw http.ResponseWriter, r *http.Request) { makeshortHandle(rw, r, *surladdr) })
