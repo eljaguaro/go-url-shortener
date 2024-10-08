@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -80,6 +82,11 @@ func main() {
 	r.Post("/", makeshortHandle)
 	r.Get("/{id}", geturlHandle)
 	// r.Get("/fw", rhandle)
+	run := flag.String("a", "localhost:8080", "адрес запуска http-сервера")
+	surl := flag.String("b", "http://localhost:8000/qsd54gFg", "безовый адрес результирующего URL")
+	flag.Parse()
+	fmt.Println("address to run the server:", *run)
+	fmt.Println("server address and shorturl", *surl)
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
 

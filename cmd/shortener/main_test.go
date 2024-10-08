@@ -38,6 +38,7 @@ func TestShortener(t *testing.T) {
 	ts := resty.New()
 	type etalpost struct {
 		method string
+
 		url    string
 		body   string
 		status int
