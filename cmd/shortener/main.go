@@ -75,7 +75,6 @@ func WithLogging(h http.HandlerFunc) http.HandlerFunc {
 		duration := time.Since(start)
 
 		sugar.Infoln(
-			"uri", r.RequestURI,
 			"method", r.Method,
 			"status", responseData.status, // получаем перехваченный код статуса ответа
 			"duration", duration,
@@ -154,13 +153,13 @@ func main() {
 	r.Post("/", WithLogging((func(rw http.ResponseWriter, r *http.Request) { makeshortHandle(rw, r, *surladdr) })))
 	r.Get("/{id}", WithLogging(geturlHandle))
 
-	addr := "127.0.0.1:8080"
-	sugar.Infow(
-		"Starting server",
-		"addr", addr,
-	)
-	if err := http.ListenAndServe(addr, nil); err != nil {
-		sugar.Fatalw(err.Error(), "event", "start server")
-	}
+	// addr := "127.0.0.1:8080"
+	// sugar.Infow(
+	// 	"Starting server",
+	// 	"addr", addr,
+	// )
+	// if err := http.ListenAndServe(addr, nil); err != nil {
+	// 	sugar.Fatalw(err.Error(), "event", "start server")
+	// }
 	log.Fatal(http.ListenAndServe(":"+port, r))
 }
