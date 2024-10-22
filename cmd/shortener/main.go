@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -56,6 +58,29 @@ func makeshortHandle(rw http.ResponseWriter, r *http.Request, surladdr string) {
 	rw.WriteHeader(http.StatusCreated)
 	rw.Header().Set("Content-Type", "text/plain")
 	rw.Write([]byte(surladdr + "/" + makeshortFunc(url.URL)))
+}
+
+func makeshortjsonHandle(rw http.ResponseWriter, r *http.Request, surladdr string) {
+	var url URL
+	var buf bytes.Buffer
+	_, err := buf.ReadFrom(r.Body)
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if err = json.Unmarshal(buf.Bytes(), &url); err != nil {
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+	rw.Header().Set("Content-Type", "application/json")
+	resp := make(map[string]string)
+	resp["result"] = surladdr + "/" + makeshortFunc(url.URL)
+	jsonResp, err := json.Marshal(resp)
+	if err != nil {
+		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+	}
+	rw.WriteHeader(http.StatusCreated)
+	rw.Write(jsonResp)
 }
 
 func WithLogging(h http.HandlerFunc) http.HandlerFunc {
@@ -152,14 +177,11 @@ func main() {
 	r := chi.NewRouter()
 	r.Post("/", WithLogging((func(rw http.ResponseWriter, r *http.Request) { makeshortHandle(rw, r, *surladdr) })))
 	r.Get("/{id}", WithLogging(geturlHandle))
-
-	// addr := "127.0.0.1:8080"
-	// sugar.Infow(
-	// 	"Starting server",
-	// 	"addr", addr,
-	// )
-	// if err := http.ListenAndServe(addr, nil); err != nil {
-	// 	sugar.Fatalw(err.Error(), "event", "start server")
-	// }
+	r.Post("/api/shorten", WithLogging((func(rw http.ResponseWriter, r *http.Request) { makeshortjsonHandle(rw, r, *surladdr) })))
 	log.Fatal(http.ListenAndServe(":"+port, r))
 }
+
+// curl --header "Content-Type: application/json" \
+//    --request POST \
+//    --data '{"username":"xyz","password":"xyz"}' \
+//    http://localhost:8080/api/shorten
