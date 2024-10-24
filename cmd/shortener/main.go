@@ -39,6 +39,7 @@ func geturlHandle(rw http.ResponseWriter, r *http.Request) {
 	long := geturlFunc(chi.URLParam(r, "id"))
 	if long == "The short url not found" {
 		rw.WriteHeader(http.StatusNotFound)
+		rw.Write([]byte("No such short url"))
 		return
 	}
 	http.Redirect(rw, r, long, http.StatusTemporaryRedirect)
@@ -160,28 +161,29 @@ func (w gzipWriter) Write(b []byte) (int, error) {
 	return w.Writer.Write(b)
 }
 
-// var acceptedHeaders = []string{"application/json", "text/html"}
+var acceptedHeaders = []string{"application/json", "text/html"}
 
-// func gzipHandle(next http.Handler) http.Handler {
-// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") || !slices.Contains(acceptedHeaders, r.Header.Get("Content-Type")) {
-// 			next.ServeHTTP(w, r)
-// 			return
-// 		}
+func gzipHandle(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") || !slices.Contains(acceptedHeaders, r.Header.Get("Content-Type")) {
+			next.ServeHTTP(w, r)
+			return
+		}
 
-// 		// создаём gzip.Writer поверх текущего w
-// 		gz, err := gzip.NewWriterLevel(w, gzip.BestSpeed)
-// 		if err != nil {
-// 			io.WriteString(w, err.Error())
-// 			return
-// 		}
-// 		defer gz.Close()
+		// создаём gzip.Writer поверх текущего w
+		gz, err := gzip.NewWriterLevel(w, gzip.BestSpeed)
+		if err != nil {
+			io.WriteString(w, err.Error())
+			return
+		}
+		defer gz.Close()
 
-//			w.Header().Set("Content-Encoding", "gzip")
-//			// передаём обработчику страницы переменную типа gzipWriter для вывода данных
-//			next.ServeHTTP(gzipWriter{ResponseWriter: w, Writer: gz}, r)
-//		})
-//	}
+		w.Header().Set("Content-Encoding", "gzip")
+		// передаём обработчику страницы переменную типа gzipWriter для вывода данных
+		next.ServeHTTP(gzipWriter{ResponseWriter: w, Writer: gz}, r)
+	})
+}
+
 type compressWriter struct {
 	w  http.ResponseWriter
 	zw *gzip.Writer
@@ -241,36 +243,36 @@ func (c *compressReader) Close() error {
 	return c.zr.Close()
 }
 
-var acceptedHeaders = []string{"application/json", "text/html"}
+// var acceptedHeaders = []string{"application/json", "text/html"}
 
-func gzipMiddleware(h http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ow := w
-		if slices.Contains(acceptedHeaders, r.Header.Get("Content-Type")) {
+// func gzipMiddleware(h http.HandlerFunc) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		ow := w
+// 		if slices.Contains(acceptedHeaders, r.Header.Get("Content-Type")) {
 
-			acceptEncoding := r.Header.Get("Accept-Encoding")
-			supportsGzip := strings.Contains(acceptEncoding, "gzip")
-			if supportsGzip {
-				cw := newCompressWriter(w)
-				ow = cw
-				defer cw.Close()
-			}
+// 			acceptEncoding := r.Header.Get("Accept-Encoding")
+// 			supportsGzip := strings.Contains(acceptEncoding, "gzip")
+// 			if supportsGzip {
+// 				cw := newCompressWriter(w)
+// 				ow = cw
+// 				defer cw.Close()
+// 			}
 
-			contentEncoding := r.Header.Get("Content-Encoding")
-			sendsGzip := strings.Contains(contentEncoding, "gzip")
-			if sendsGzip {
-				cr, err := newCompressReader(r.Body)
-				if err != nil {
-					w.WriteHeader(http.StatusInternalServerError)
-					return
-				}
-				r.Body = cr
-				defer cr.Close()
-			}
-		}
-		h.ServeHTTP(ow, r)
-	}
-}
+// 			contentEncoding := r.Header.Get("Content-Encoding")
+// 			sendsGzip := strings.Contains(contentEncoding, "gzip")
+// 			if sendsGzip {
+// 				cr, err := newCompressReader(r.Body)
+// 				if err != nil {
+// 					w.WriteHeader(http.StatusInternalServerError)
+// 					return
+// 				}
+// 				r.Body = cr
+// 				defer cr.Close()
+// 			}
+// 		}
+// 		h.ServeHTTP(ow, r)
+// 	}
+// }
 
 func main() {
 	var cfg Config
@@ -286,8 +288,8 @@ func main() {
 	defer logger.Sync()
 	sugar = *logger.Sugar()
 
-	run := flag.String("a", "localhost:8080", "адрес запуска http-сервера")
-	surladdr := flag.String("b", "http://localhost:8080", "базовый адрес результирующего URL")
+	run := flag.String("a", "localhost:8090", "адрес запуска http-сервера")
+	surladdr := flag.String("b", "http://localhost:8090", "базовый адрес результирующего URL")
 	flag.Parse()
 	fmt.Println("address to run the server:", run)
 	fmt.Println("server address and shorturl", surladdr)
@@ -299,10 +301,10 @@ func main() {
 	}
 	port := strings.Split(*run, ":")[1]
 	r := chi.NewRouter()
-	r.Post("/", WithLogging(gzipMiddleware((func(rw http.ResponseWriter, r *http.Request) { makeshortHandle(rw, r, *surladdr) }))))
-	r.Get("/{id}", WithLogging(gzipMiddleware(geturlHandle)))
-	r.Post("/api/shorten", WithLogging(gzipMiddleware(func(rw http.ResponseWriter, r *http.Request) { makeshortjsonHandle(rw, r, *surladdr) })))
-	log.Fatal(http.ListenAndServe(":"+port, r))
+	r.Post("/", WithLogging((func(rw http.ResponseWriter, r *http.Request) { makeshortHandle(rw, r, *surladdr) })))
+	r.Get("/{id}", WithLogging(geturlHandle))
+	r.Post("/api/shorten", WithLogging((func(rw http.ResponseWriter, r *http.Request) { makeshortjsonHandle(rw, r, *surladdr) })))
+	log.Fatal(http.ListenAndServe(":"+port, gzipHandle(r)))
 }
 
 // curl --header "Content-Type: application/json" \
@@ -313,9 +315,8 @@ func main() {
 // curl --header "Content-Type: application/json" \
 //     --request POST \
 //     --data '{"username":"xyz","password":"xyz"}' \
-//     http://localhost:8093/api/shorten
+//     http://localhost:8090/api/shorten
 
+// curl http://localhost:8090/0CW361Uz
 // curl --header "Content-Type: text/plain" \
-//     --request POST \
-//     --data '{"username":"xyz","password":"xyz"}' \
-//     http://localhost:8095/api/shorten
+// http://localhost:8090/5x1COqKy
