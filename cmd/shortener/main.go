@@ -2,12 +2,14 @@ package main
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"slices"
 	"strings"
 	"time"
 
@@ -148,6 +150,126 @@ func (r *loggingResponseWriter) WriteHeader(statusCode int) {
 	r.responseData.status = statusCode // захватываем код статуса
 }
 
+type gzipWriter struct {
+	http.ResponseWriter
+	Writer io.Writer
+}
+
+func (w gzipWriter) Write(b []byte) (int, error) {
+	// w.Writer будет отвечать за gzip-сжатие, поэтому пишем в него
+	return w.Writer.Write(b)
+}
+
+var acceptedHeaders = []string{"application/json", "text/html"}
+
+// func gzipHandle(next http.Handler) http.Handler {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") || !slices.Contains(acceptedHeaders, r.Header.Get("Content-Type")) {
+// 			next.ServeHTTP(w, r)
+// 			return
+// 		}
+
+// 		// создаём gzip.Writer поверх текущего w
+// 		gz, err := gzip.NewWriterLevel(w, gzip.BestSpeed)
+// 		if err != nil {
+// 			io.WriteString(w, err.Error())
+// 			return
+// 		}
+// 		defer gz.Close()
+
+//			w.Header().Set("Content-Encoding", "gzip")
+//			// передаём обработчику страницы переменную типа gzipWriter для вывода данных
+//			next.ServeHTTP(gzipWriter{ResponseWriter: w, Writer: gz}, r)
+//		})
+//	}
+type compressWriter struct {
+	w  http.ResponseWriter
+	zw *gzip.Writer
+}
+
+func newCompressWriter(w http.ResponseWriter) *compressWriter {
+	return &compressWriter{
+		w:  w,
+		zw: gzip.NewWriter(w),
+	}
+}
+
+func (c *compressWriter) Header() http.Header {
+	return c.w.Header()
+}
+
+func (c *compressWriter) Write(p []byte) (int, error) {
+	return c.zw.Write(p)
+}
+
+func (c *compressWriter) WriteHeader(statusCode int) {
+	if statusCode < 300 {
+		c.w.Header().Set("Content-Encoding", "gzip")
+	}
+	c.w.WriteHeader(statusCode)
+}
+
+func (c *compressWriter) Close() error {
+	return c.zw.Close()
+}
+
+type compressReader struct {
+	r  io.ReadCloser
+	zr *gzip.Reader
+}
+
+func newCompressReader(r io.ReadCloser) (*compressReader, error) {
+	zr, err := gzip.NewReader(r)
+	if err != nil {
+		return nil, err
+	}
+
+	return &compressReader{
+		r:  r,
+		zr: zr,
+	}, nil
+}
+
+func (c compressReader) Read(p []byte) (n int, err error) {
+	return c.zr.Read(p)
+}
+
+func (c *compressReader) Close() error {
+	if err := c.r.Close(); err != nil {
+		return err
+	}
+	return c.zr.Close()
+}
+func gzipMiddleware(h http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ow := w
+		if slices.Contains(acceptedHeaders, r.Header.Get("Content-Type")) {
+
+			acceptEncoding := r.Header.Get("Accept-Encoding")
+			supportsGzip := strings.Contains(acceptEncoding, "gzip")
+			if supportsGzip {
+				cw := newCompressWriter(w)
+				ow = cw
+				defer cw.Close()
+			}
+
+			contentEncoding := r.Header.Get("Content-Encoding")
+			sendsGzip := strings.Contains(contentEncoding, "gzip")
+			if sendsGzip {
+				cr, err := newCompressReader(r.Body)
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				r.Body = cr
+				defer cr.Close()
+			}
+		}
+
+		h.ServeHTTP(ow, r)
+	}
+}
+
 func main() {
 	var cfg Config
 	err := env.Parse(&cfg)
@@ -175,9 +297,9 @@ func main() {
 	}
 	port := strings.Split(*run, ":")[1]
 	r := chi.NewRouter()
-	r.Post("/", WithLogging((func(rw http.ResponseWriter, r *http.Request) { makeshortHandle(rw, r, *surladdr) })))
-	r.Get("/{id}", WithLogging(geturlHandle))
-	r.Post("/api/shorten", WithLogging((func(rw http.ResponseWriter, r *http.Request) { makeshortjsonHandle(rw, r, *surladdr) })))
+	r.Post("/", WithLogging(gzipMiddleware((func(rw http.ResponseWriter, r *http.Request) { makeshortHandle(rw, r, *surladdr) }))))
+	r.Get("/{id}", WithLogging(gzipMiddleware(geturlHandle)))
+	r.Post("/api/shorten", WithLogging(gzipMiddleware((func(rw http.ResponseWriter, r *http.Request) { makeshortjsonHandle(rw, r, *surladdr) }))))
 	log.Fatal(http.ListenAndServe(":"+port, r))
 }
 
