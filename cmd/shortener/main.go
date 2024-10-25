@@ -304,8 +304,8 @@ func main() {
 	defer logger.Sync()
 	sugar = *logger.Sugar()
 
-	run := flag.String("a", "localhost:8090", "адрес запуска http-сервера")
-	surladdr := flag.String("b", "http://localhost:8090", "базовый адрес результирующего URL")
+	run := flag.String("a", "localhost:8080", "адрес запуска http-сервера")
+	surladdr := flag.String("b", "http://localhost:8080", "базовый адрес результирующего URL")
 	flag.Parse()
 	fmt.Println("address to run the server:", run)
 	fmt.Println("server address and shorturl", surladdr)
