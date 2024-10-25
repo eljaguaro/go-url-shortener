@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"compress/gzip"
 	"encoding/json"
 	"flag"
@@ -64,14 +63,31 @@ func makeshortHandle(rw http.ResponseWriter, r *http.Request, surladdr string) {
 }
 
 func makeshortjsonHandle(rw http.ResponseWriter, r *http.Request, surladdr string) {
+	gz, err := gzip.NewReader(r.Body)
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// закрытие gzip-читателя опционально, т.к. все данные уже прочитаны и
+	// текущая реализация не требует закрытия, тем не менее лучше это делать -
+	// некоторые реализации могут рассчитывать на закрытие читателя
+	// gz.Close() не вызывает закрытия r.Body - это будет сделано позже, http-сервером
+	defer gz.Close()
+
+	// при чтении вернётся распакованный слайс байт
+	body, err := io.ReadAll(gz)
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	var url URL
-	var buf bytes.Buffer
-	_, err := buf.ReadFrom(r.Body)
+	// var buf bytes.Buffer
+	// _, err := buf.ReadFrom(r.Body)
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
-	if err = json.Unmarshal(buf.Bytes(), &url); err != nil {
+	if err = json.Unmarshal(body, &url); err != nil {
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -288,8 +304,8 @@ func main() {
 	defer logger.Sync()
 	sugar = *logger.Sugar()
 
-	run := flag.String("a", "localhost:8080", "адрес запуска http-сервера")
-	surladdr := flag.String("b", "http://localhost:8080", "базовый адрес результирующего URL")
+	run := flag.String("a", "localhost:8090", "адрес запуска http-сервера")
+	surladdr := flag.String("b", "http://localhost:8090", "базовый адрес результирующего URL")
 	flag.Parse()
 	fmt.Println("address to run the server:", run)
 	fmt.Println("server address and shorturl", surladdr)
@@ -319,4 +335,9 @@ func main() {
 
 // curl http://localhost:8090/0CW361Uz
 // curl --header "Content-Type: text/plain" \
-// http://localhost:8090/5x1COqKy
+// 	http://localhost:8090/lIx28TMSe
+
+// curl --header "Content-Type: application/json" \
+// 	--request POST \
+//     --data '{"username":"xyz","password":"xyz"}' \
+// 	http://localhost:8090/lIx28TMSe
